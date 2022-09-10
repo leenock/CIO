@@ -1,6 +1,7 @@
 from pandas import read_excel
 from openpyxl.utils.dataframe import dataframe_to_rows
 import statistics
+import pandas as pd
 
 dataframe = read_excel('SampleData.xlsx', engine='openpyxl')
 
@@ -56,3 +57,18 @@ print("Average of Total is", average_total)
 
 #  create functions to support shrink and expand of array size dynamically
 
+
+
+# 4.Using the functions and classes you have
+# created from exercises 1-3, group and display the data from Financial Sample.xlsx based on country.
+
+df_samples = pd.read_excel(r'FinancialSample.xlsx', engine='openpyxl')
+print(df_samples.head())
+
+df_sample_x = df_samples.groupby("Country").mean()
+df_sample_x = df_sample_x.drop(['Month Number', 'Year'], axis=1)
+print((df_sample_x))
+
+df_sample_x = df_samples.groupby("Country").sum()
+df_sample_x = df_sample_x.drop(['Month Number', 'Year'], axis=1)
+print((df_sample_x))
