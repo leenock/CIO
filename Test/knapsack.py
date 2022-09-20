@@ -5,8 +5,8 @@ class Knapsack:
     def __init__(self):
 
         # initialize instance variables:
-        self.items = []
-        self.maxCapacity = 0
+        self.items = []   # items in the list.
+        self.maxCapacity = 0  # maximum capacity that is needed.
 
         # initialize the data:
         self.__initData()
