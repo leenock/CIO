@@ -1,148 +1,100 @@
-from deap import base
-from deap import creator
-from deap import tools
-from deap import algorithms
+import numpy
 import random
+
 import numpy as np
-import matplotlib.pyplot as plt
-
-
+from deap import base,tools,creator,algorithms
+# encode info into TSP class
 class TSP:
-
-    def __init__(self, towns):
-
-        # initialize instance variables:
-        self.towns = towns
+    #number of cities
+    # map to represent distances between cities
+    # a value to represent total distance covered
+    # list of city names
+    def __init__(self, cityNo):
+        self.cityNo = cityNo
         self.map = []
-        self.listOfCities = []
+        self.listOfCities = ["KL","singapore","bangkok","penang","JB","langkawi","London","New york"]
         self.distance = 0
-
-        # initialize the data:
-        self.__initData()
-
-    def __len__(self):
-        """
-        :return: the total number of towns defined in the problem
-        """
-        return len(self.towns)
-
-    def __initData(self):
-        self.map = np.zeros((self.towns, self.towns))
-        for i in range(0, self.towns):
+        self.__initMap()
+    def __initMap(self):
+        self.map = np.zeros((self.cityNo,self.cityNo))
+        for i in range(0,self.cityNo):
             for j in range(0, i):
-                self.map[i, j] = random.randrange(50, 500)
-                self.map[j, i] = self.map[i, j]
+                self.map[i][j] = random.randrange(10,100)
+                self.map[j][i] = self.map[i][j]
+    # a function to evaluate solutions - fitness function
+    def calcDistance(self, individual):  # [1,3,4,2]
+        pair_cities = list(zip(individual, individual[1:]))#[(1,3),(3,4),(4,2)]
+        for i in pair_cities:#[(1,3),(3,4),(4,2)]
+            self.distance = self.distance + self.map[i]
+        return self.distance
+    def printCities(self,individual):
+        cities = []
+        for i in individual:
+            cities.append(self.listOfCities[i])
+        return cities
+noOfCities = 8
+tsp = TSP(noOfCities)
+##### set up the GA
 
-    ## define the fitness function
+# Genetic Algorithm constants:
+POPULATION_SIZE = 50
+P_CROSSOVER = 0.9  # probability for crossover
+P_MUTATION = 0.2  # probability for mutating an individual
+MAX_GENERATIONS = 100
+HALL_OF_FAME_SIZE = 10
 
-    def getFitness(self, individual):
-        return sum(
-            [
-                self.map[individual[i], individual[i + 1]]
-                for i in range(len(individual) - 1)
-            ]
-                  )
-        map.getFitness = getFitness
-
-        # Determine selection process
-
-        def evaluate(self):
-            distances = np.asarray(
-                [self.fitness(individual) for individual in self.towns]
-            )
-            self.score = np.min(distances)
-            self.best = self.towns[distances.tolist().index(self.score)]
-            self.parents.append(self.best)
-            if False in (distances[0] == distances):
-                distances = np.max(distances) - distances
-            return distances / np.sum(distances)
-
-        map.evaluate = evaluate
-
-        print(pop.evaluate())
-
-
-    def printMap(self):
-        return self.map
-
-
-s = TSP(4)
-print(s.printMap())
-
-
-
-
-
-
-
-
-
-chrom_size = 100
-population_size = 150
-p_crossover = 0.9
-m_mutation = 0.5
-max_generations = 200
-random_seed = 42
-
+# set the random seed:
+RANDOM_SEED = 42
+random.seed(RANDOM_SEED)
 toolbox = base.Toolbox()
+# create an operator that randomly returns 0 or 1:
+toolbox.register("numbers", random.sample, range(noOfCities),noOfCities)
+# define a single objective, maximizing fitness strategy:
+creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+# create the Individual class based on list:
+creator.create("Individual", list, fitness=creator.FitnessMin)
+# create the individual operator to fill up an Individual instance:
+toolbox.register("individualCreator", tools.initIterate, creator.Individual, toolbox.numbers)
+# create the population operator to generate a list of individuals:
+toolbox.register("populationCreator", tools.initRepeat, list, toolbox.individualCreator)
 
-toolbox.register("binary", random.randint, 0, 1)
+# fitness calculation
+def tspValue(individual):
+    return tsp.calcDistance(individual),  # return a tuple
 
-creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-
-creator.create("Individual", list, fitness=creator.FitnessMax)
-
-toolbox.register("IndividualCreator", tools.initRepeat, creator.Individual, toolbox.binary, len(knapsack_prob))
-
-toolbox.register("populationCreator", tools.initRepeat, list, toolbox.IndividualCreator)
-
-
-def fitnessFuntion(individual):
-    return knapsack_prob.getValue(individual),
-
-
-toolbox.register("evaluate", fitnessFuntion)
-
-toolbox.register("select", tools.selTournament, tournsize=3)
-
+toolbox.register("evaluate", tspValue)
+# genetic operators:mutFlipBit
+# Tournament selection with tournament size of 3:
+toolbox.register("select", tools.selTournament, tournsize=2)
+# Single-point crossover:
 toolbox.register("mate", tools.cxOnePoint)
+# Flip-bit mutation:
+# indpb: Independent probability for each attribute to be flipped
+toolbox.register("mutate", tools.mutShuffleIndexes, indpb=1.0/noOfCities)
 
-toolbox.register("mutate", tools.mutFlipBit, indpb=1 / population_size)
-
-
+# Genetic Algorithm flow:
 def main():
-    population = toolbox.populationCreator(n=population_size)
-
+    # create initial population (generation 0):
+    population = toolbox.populationCreator(n=POPULATION_SIZE)
+    # prepare the statistics object:
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("max", np.max)
+    stats.register("min", np.min)
     stats.register("avg", np.mean)
-
     # define the hall-of-fame object:
-    HALL_OF_FAME_SIZE = 10
     hof = tools.HallOfFame(HALL_OF_FAME_SIZE)
-
-    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=p_crossover, mutpb=m_mutation,
-                                              ngen=max_generations,
-                                              stats=stats, halloffame=hof, verbose=True)
-
-    # population, logbook = algorithms.eaSimple(population, toolbox, cxpb=P_CROSSOVER, mutpb=P_MUTATION, ngen=MAX_GENERATIONS,stats=stats, halloffame=hof, verbose=True)
+    # perform the Genetic Algorithm flow with hof feature added:
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=P_CROSSOVER, mutpb=P_MUTATION,
+                                              ngen=MAX_GENERATIONS, stats=stats, halloffame=hof, verbose=False)
     # print best solution found:
     best = hof.items[0]
-    print("-- Best Individual = ", best)
-    print("-- Best Fitness = ", best.fitness.values[0])
-    print()
-    print("-- Schedule = ")
-    knapsack_prob.printItems(best)
-
-    maxFitnessValues, meanFitnessValues = logbook.select("max", "avg")
-
-    plt.plot(maxFitnessValues, color='red')
-    plt.plot(meanFitnessValues, color='green')
-    plt.xlabel('max/average fitness')
-    plt.ylabel('max/average fitness over generations')
-    plt.show()
-
-
+    print("-- Best Ever Individual = ", best)
+    print("-- Best Ever Fitness/distance = ", best.fitness.values[0])
+    print("city sequence: ", tsp.printCities(best))
+    #print("-- Knapsack Items = ")
+    #knapsack.printItems(best)
+    # extract statistics:
+    #maxFitnessValues, meanFitnessValues = logbook.select("max", "avg")
+    # plot statistics:
 
 if __name__ == "__main__":
     main()
