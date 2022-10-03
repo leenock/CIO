@@ -47,6 +47,7 @@ HALL_OF_FAME_SIZE = 10
 RANDOM_SEED = 42
 random.seed(RANDOM_SEED)
 toolbox = base.Toolbox()
+
 # create an operator that randomly returns 0 or 1:
 toolbox.register("numbers", random.sample, range(noOfCities),noOfCities)
 # define a single objective, maximizing fitness strategy:
