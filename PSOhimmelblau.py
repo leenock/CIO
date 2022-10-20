@@ -12,7 +12,7 @@ MIN_START_POSITION, MAX_START_POSITION = -5, 5
 MIN_SPEED, MAX_SPEED = -3, 3
 MAX_LOCAL_UPDATE_FACTOR = MAX_GLOBAL_UPDATE_FACTOR = 2.0
 # set the random seed:
-RANDOM_SEED = 18
+RANDOM_SEED = 17
 np.random.seed(RANDOM_SEED)
 
 toolbox = base.Toolbox()
@@ -23,6 +23,7 @@ creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 # define the particle class based on ndarray:
 creator.create("Particle", np.ndarray, fitness=creator.FitnessMin, speed=None, best=None)
 
+
 # create and initialize a new particle:
 def createParticle():
     particle = creator.Particle(np.random.uniform(MIN_START_POSITION,
@@ -31,16 +32,15 @@ def createParticle():
     particle.speed = np.random.uniform(MIN_SPEED, MAX_SPEED, DIMENSIONS)
     return particle
 
+
 # create the 'particleCreator' operator to fill up a particle instance:
 toolbox.register("particleCreator", createParticle)
-
 
 # create the 'population' operator to generate a list of particles:
 toolbox.register("populationCreator", tools.initRepeat, list, toolbox.particleCreator)
 
 
 def updateParticle(particle, best):
-
     # create random factors:
     localUpdateFactor = np.random.uniform(0, MAX_LOCAL_UPDATE_FACTOR, particle.size)
     globalUpdateFactor = np.random.uniform(0, MAX_GLOBAL_UPDATE_FACTOR, particle.size)

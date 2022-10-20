@@ -6,7 +6,11 @@ import numpy as np
 import random
 import numpy
 
+import math    # cos() for Rastrigin
+
+
 import matplotlib.pyplot as plt
+
 
 class Knapsack:
 
@@ -92,7 +96,7 @@ knapsack = Knapsack()
 DIMENSIONS = 20
 POPULATION_SIZE = 20
 MAX_GENERATIONS = 750
-MIN_START_POSITION, MAX_START_POSITION = -20, 5
+MIN_START_POSITION, MAX_START_POSITION = -20, 20
 MIN_SPEED, MAX_SPEED = -3, 3
 MAX_LOCAL_UPDATE_FACTOR = MAX_GLOBAL_UPDATE_FACTOR = 2.0
 # set the random seed:
@@ -107,6 +111,7 @@ creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 # define the particle class based on ndarray:
 creator.create("Particle", np.ndarray, fitness=creator.FitnessMax, speed=None, best=None)
 
+
 # create and initialize a new particle:
 def createParticle():
     particle = creator.Particle(np.random.uniform(MIN_START_POSITION,
@@ -115,16 +120,15 @@ def createParticle():
     particle.speed = np.random.uniform(MIN_SPEED, MAX_SPEED, DIMENSIONS)
     return particle
 
+
 # create the 'particleCreator' operator to fill up a particle instance:
 toolbox.register("particleCreator", createParticle)
-
 
 # create the 'population' operator to generate a list of particles:
 toolbox.register("populationCreator", tools.initRepeat, list, toolbox.particleCreator)
 
 
 def updateParticle(particle, best):
-
     # create random factors:
     localUpdateFactor = np.random.uniform(0, MAX_LOCAL_UPDATE_FACTOR, particle.size)
     globalUpdateFactor = np.random.uniform(0, MAX_GLOBAL_UPDATE_FACTOR, particle.size)
@@ -154,7 +158,18 @@ def himmelblau(particle):
     return f,  # return a tuple
 
 
-toolbox.register("evaluate", himmelblau)
+# maximization mathematical function for optimization
+
+# rastrigin function
+def fitness_rastrigin(particle):
+    f = 0.0
+    for i in range(len(particle)):
+        xi = particle[i]
+        f += (xi * xi) - (10 * math.cos(2 * math.pi * xi)) + 10
+    return f
+
+
+toolbox.register("evaluate", fitness_rastrigin)
 
 
 def main():
@@ -197,10 +212,11 @@ def main():
         print(logbook.stream)
 
     # print info for best solution found:
-    #print("-- Best Particle = ", best)
-    #print("-- Best Fitness = ", best.fitness.values[0])
+    # print("-- Best Particle = ", best)
+    # print("-- Best Fitness = ", best.fitness.values[0])
 
     print(knapsack.printItems(best))
+
 
 if __name__ == "__main__":
     main()

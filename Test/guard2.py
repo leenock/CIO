@@ -8,7 +8,6 @@ import numpy
 import matplotlib.pyplot as plt
 
 
-
 # In[2]:
 class Guard:
 
@@ -170,11 +169,8 @@ toolbox.register("individualCreator", tools.initRepeat, creator.Individual, tool
 toolbox.register("populationCreator", tools.initRepeat, list, toolbox.individualCreator)
 
 
-
-
 def getCost(individual):
     return gsp.getCost(individual),
-
 
 
 toolbox.register("evaluate", getCost)
@@ -186,8 +182,6 @@ toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("mate", tools.cxOnePoint)
 
 toolbox.register("mutate", tools.mutFlipBit, indpb=1.0 / len(gsp))
-
-
 
 # create initial population (generation 0):
 population = toolbox.populationCreator(n=POPULATION_SIZE)
@@ -204,8 +198,8 @@ hof = tools.HallOfFame(HALL_OF_FAME_SIZE)
 population, logbook = algorithms.eaSimple(population, toolbox, cxpb=P_CROSSOVER, mutpb=P_MUTATION, ngen=MAX_GENERATIONS,
                                           stats=stats, halloffame=hof, verbose=True)
 
-#population, logbook = algorithms.eaSimple(population, toolbox, cxpb=P_CROSSOVER, mutpb=P_MUTATION, ngen=MAX_GENERATIONS,stats=stats, halloffame=hof, verbose=True)
-#print best solution found:
+# population, logbook = algorithms.eaSimple(population, toolbox, cxpb=P_CROSSOVER, mutpb=P_MUTATION, ngen=MAX_GENERATIONS,stats=stats, halloffame=hof, verbose=True)
+# print best solution found:
 best = hof.items[0]
 print("-- Best Individual = ", best)
 print("-- Best Fitness = ", best.fitness.values[0])
